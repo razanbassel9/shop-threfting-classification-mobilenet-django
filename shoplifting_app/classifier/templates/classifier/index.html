@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>كشف السرقة</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #1a1d27;
+      border: 1px solid #2e3147;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+
+    .logo {
+      font-size: 36px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 32px;
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed #2e3147;
+      border-radius: 12px;
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #12151f;
+      margin-bottom: 20px;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: #6366f1;
+      background: #1a1d35;
+    }
+
+    .drop-zone .icon { font-size: 40px; margin-bottom: 10px; }
+
+    .drop-zone p {
+      font-size: 14px;
+      color: #9ca3af;
+      margin-bottom: 12px;
+    }
+
+    .drop-zone span {
+      font-size: 12px;
+      color: #4b5563;
+    }
+
+    #file-input { display: none; }
+
+    .browse-btn {
+      display: inline-block;
+      background: #6366f1;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    .browse-btn:hover { background: #4f46e5; }
+
+    /* Preview */
+    #preview-wrap {
+      display: none;
+      background: #12151f;
+      border: 1px solid #2e3147;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #preview-wrap .file-icon { font-size: 28px; }
+
+    #preview-wrap .file-info { flex: 1; overflow: hidden; }
+    #preview-wrap .file-name {
+      font-size: 13px;
+      color: #e0e0e0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #preview-wrap .file-size { font-size: 11px; color: #6b7280; margin-top: 2px; }
+
+    #clear-btn {
+      background: none;
+      border: none;
+      color: #6b7280;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    #clear-btn:hover { color: #ef4444; }
+
+    /* Submit button */
+    #submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 20px;
+    }
+    #submit-btn:hover:not(:disabled) { background: #4f46e5; }
+    #submit-btn:disabled { background: #2e3147; color: #4b5563; cursor: not-allowed; }
+
+    /* Progress */
+    #progress-wrap { display: none; margin-bottom: 20px; }
+    .progress-label { font-size: 12px; color: #9ca3af; margin-bottom: 6px; }
+    .progress-bar-bg {
+      background: #2e3147;
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: #6366f1;
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.3s;
+      animation: indeterminate 1.4s infinite ease-in-out;
+    }
+    @keyframes indeterminate {
+      0%   { width: 0%;   margin-right: 100%; }
+      50%  { width: 60%;  margin-right: 20%;  }
+      100% { width: 0%;   margin-right: 100%; }
+    }
+
+    /* Result */
+    #result { display: none; border-radius: 12px; padding: 20px; text-align: center; }
+    #result.shoplifter  { background: #2d1515; border: 1px solid #7f1d1d; }
+    #result.normal      { background: #132d1f; border: 1px solid #14532d; }
+
+    #result .result-icon { font-size: 40px; margin-bottom: 8px; }
+    #result .result-label { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    #result.shoplifter  .result-label { color: #f87171; }
+    #result.normal      .result-label { color: #4ade80; }
+
+    #result .result-conf { font-size: 13px; color: #9ca3af; }
+
+    #error-msg {
+      display: none;
+      background: #2d1515;
+      border: 1px solid #7f1d1d;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13px;
+      color: #f87171;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🛒</div>
+  <h1>نظام كشف السرقة</h1>
+  <p class="subtitle">ارفع فيديو وسيقوم الموديل بتحليله تلقائياً</p>
+
+  <!-- Drop zone -->
+  <div class="drop-zone" id="drop-zone">
+    <div class="icon">📹</div>
+    <p>اسحب الفيديو وأفلته هنا</p>
+    <span>MP4 · AVI · MOV · مدة أقصاها 5 دقائق</span>
+    <br/>
+    <label class="browse-btn" for="file-input">اختر ملف</label>
+    <input type="file" id="file-input" accept="video/*" />
+  </div>
+
+  <!-- File preview -->
+  <div id="preview-wrap">
+    <span class="file-icon">🎬</span>
+    <div class="file-info">
+      <div class="file-name" id="file-name">—</div>
+      <div class="file-size" id="file-size">—</div>
+    </div>
+    <button id="clear-btn" title="إزالة">✕</button>
+  </div>
+
+  <!-- Submit -->
+  <button id="submit-btn" disabled>تحليل الفيديو</button>
+
+  <!-- Progress -->
+  <div id="progress-wrap">
+    <div class="progress-label">جاري التحليل...</div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
+  </div>
+
+  <!-- Result -->
+  <div id="result">
+    <div class="result-icon" id="result-icon"></div>
+    <div class="result-label" id="result-label"></div>
+    <div class="result-conf" id="result-conf"></div>
+  </div>
+
+  <!-- Error -->
+  <div id="error-msg"></div>
+</div>
+
+<script>
+  const dropZone   = document.getElementById('drop-zone');
+  const fileInput  = document.getElementById('file-input');
+  const previewWrap= document.getElementById('preview-wrap');
+  const fileName   = document.getElementById('file-name');
+  const fileSize   = document.getElementById('file-size');
+  const clearBtn   = document.getElementById('clear-btn');
+  const submitBtn  = document.getElementById('submit-btn');
+  const progressWrap = document.getElementById('progress-wrap');
+  const result     = document.getElementById('result');
+  const errorMsg   = document.getElementById('error-msg');
+
+  let selectedFile = null;
+
+  function formatSize(bytes) {
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function setFile(file) {
+    selectedFile = file;
+    fileName.textContent = file.name;
+    fileSize.textContent = formatSize(file.size);
+    previewWrap.style.display = 'flex';
+    submitBtn.disabled = false;
+    result.style.display = 'none';
+    errorMsg.style.display = 'none';
+  }
+
+  function clearFile() {
+    selectedFile = null;
+    fileInput.value = '';
+    previewWrap.style.display = 'none';
+    submitBtn.disabled = true;
+    result.style.display = 'none';
+    errorMsg.style.display = 'none';
+  }
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) setFile(fileInput.files[0]);
+  });
+
+  clearBtn.addEventListener('click', clearFile);
+
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('video/')) setFile(file);
+  });
+
+  submitBtn.addEventListener('click', async () => {
+    if (!selectedFile) return;
+
+    submitBtn.disabled = true;
+    progressWrap.style.display = 'block';
+    result.style.display = 'none';
+    errorMsg.style.display = 'none';
+
+    const formData = new FormData();
+    formData.append('video', selectedFile);
+
+    try {
+      const resp = await fetch('/predict/', { method: 'POST', body: formData });
+      const data = await resp.json();
+
+      if (!resp.ok) throw new Error(data.error || 'خطأ في الخادم');
+
+      const isShoplift = data.prediction === 'Shoplifter';
+      result.className = isShoplift ? 'shoplifter' : 'normal';
+      document.getElementById('result-icon').textContent  = isShoplift ? '🚨' : '✅';
+      document.getElementById('result-label').textContent = isShoplift ? 'تم اكتشاف سارق!' : 'لا يوجد سرقة';
+      document.getElementById('result-conf').textContent  = `نسبة الثقة: ${data.confidence}%`;
+      result.style.display = 'block';
+
+    } catch (err) {
+      errorMsg.textContent = '⚠️ ' + err.message;
+      errorMsg.style.display = 'block';
+    } finally {
+      progressWrap.style.display = 'none';
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
